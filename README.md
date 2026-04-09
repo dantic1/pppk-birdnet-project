@@ -1,1 +1,1 @@
-# pppk-DE-project
+# pppk-birdnet-project
