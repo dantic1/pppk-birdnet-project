@@ -68,7 +68,16 @@ for location_name in sorted(os.listdir(AUDIO_DIR)):
         _, ext = os.path.splitext(filename)
         if ext.lower() not in ALLOWED_EXTENSIONS:
             continue
+
+        file_path = os.path.join(location_path, filename)
+        object_key = f"{location_name}/{filename}"
+
         print(f"\taudio: {filename}")
+
+        #upload to Minio
+        minio_client.fput_object(MINIO_BUCKET, object_key, file_path)
+        print(f"\tuploaded to Minio as '{object_key}'")
+
     
 
 
