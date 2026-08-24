@@ -1,9 +1,10 @@
 import os
 import sys
 import json 
+import requests
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from config.config import MINIO_ENDPOINT, MINIO_USER, MINIO_PASSWORD, MINIO_BUCKET, AUDIO_DIR
+from config.config import MINIO_ENDPOINT, MINIO_USER, MINIO_PASSWORD, MINIO_BUCKET, AUDIO_DIR, AVES_CLASSIFY_URL
 
 from minio import Minio
 
@@ -78,7 +79,20 @@ for location_name in sorted(os.listdir(AUDIO_DIR)):
         minio_client.fput_object(MINIO_BUCKET, object_key, file_path)
         print(f"\tuploaded to Minio as '{object_key}'")
 
-    
+        # call classification API
+        with open(file_path, "rb") as audio_file:
+            files = {"file": (filename, audio_file)}
+            response = requests.post(AVES_CLASSIFY_URL, files=files, timeout=120)
+
+        response.raise_for_status()
+        api_response = response.json()
+
+        detections = api_response.get("results", [])
+        print(f"\t{len(detections)} detection(s)")
+        for det in detections:
+            print(f"\t  - {det.get('scientific_name')} "
+                  f"({det.get('common_name')}) "
+                  f"conf={det.get('confidence')}")
 
 
 
