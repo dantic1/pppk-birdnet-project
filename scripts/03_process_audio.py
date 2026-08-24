@@ -126,6 +126,31 @@ for location_name in sorted(os.listdir(AUDIO_DIR)):
         print(f"\tsaved observation: {obs_id}")
 
 
+        # Detection-taxonomy
+        for det in detections:
+            scientific_name = det.get("scientific_name")
+
+            species_doc = species.find_one({"species": scientific_name})
+
+            classification_doc = {
+                "observation_id": obs_id,
+                "minio_key": object_key,
+                "location": location_name,
+                "lat": coords["lat"],
+                "lon": coords["lon"],
+                "common_name": det.get("common_name"),
+                "scientific_name": scientific_name,
+                "confidence": det.get("confidence"),
+                "start_time": det.get("start_time"),
+                "end_time": det.get("end_time"),
+                "species_key": species_doc.get("key") if species_doc else None,
+                "matched_taxonomy": species_doc is not None,
+            }
+            classifications.insert_one(classification_doc)
+
+        print(f"\tsaved {len(detections)} classification(s)")
+
+
 
 
 
