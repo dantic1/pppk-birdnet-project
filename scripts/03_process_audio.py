@@ -4,9 +4,13 @@ import json
 import requests
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from config.config import MINIO_ENDPOINT, MINIO_USER, MINIO_PASSWORD, MINIO_BUCKET, AUDIO_DIR, AVES_CLASSIFY_URL
+from config.config import (
+    MINIO_ENDPOINT, MINIO_USER, MINIO_PASSWORD, MINIO_BUCKET, AUDIO_DIR, AVES_CLASSIFY_URL,
+    MONGO_DB, MONGO_URI, COLLECTION_CLASSIFICATIONS, COLLECTION_OBSERVATIONS, COLLECTION_SPECIES
+)
 
 from minio import Minio
+from pymongo import MongoClient
 
 ALLOWED_EXTENSIONS = { ".mp3", ".wav" }
 LOCATIONS_FILE = os.path.join(os.path.dirname(__file__), "..", "config", "locations.json")
@@ -40,6 +44,16 @@ if not minio_client.bucket_exists(MINIO_BUCKET):
     print(f"Bucket created: {MINIO_BUCKET}")
 else:
     print(f"Bucket '{MINIO_BUCKET}' already exists.")
+
+print()
+
+# MONGO CLIENT
+mongo_client = MongoClient(MONGO_URI)
+db = mongo_client.get_database(MONGO_DB)
+
+observations = db.get_collection(COLLECTION_OBSERVATIONS)
+classifications = db.get_collection(COLLECTION_CLASSIFICATIONS)
+species = db.get_collection(COLLECTION_SPECIES)
 
 print()
 
@@ -92,7 +106,9 @@ for location_name in sorted(os.listdir(AUDIO_DIR)):
         for det in detections:
             print(f"\t  - {det.get('scientific_name')} "
                   f"({det.get('common_name')}) "
-                  f"conf={det.get('confidence')}")
+                  f"conf={det.get('confidence')}"
+            )
+
 
 
 
