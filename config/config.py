@@ -18,10 +18,6 @@ MINIO_USER = os.getenv("MINIO_USER")
 MINIO_PASSWORD = os.getenv("MINIO_PASSWORD")
 MINIO_BUCKET = os.getenv("MINIO_BUCKET")
 
-#KAFKA
-KAFKA_BROKER = os.getenv("KAFKA_BROKER")
-KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
-
 #External API
 AVES_BASE_URL = "https://aves.regoch.net"
 AVES_CLASSIFY_URL = f"{AVES_BASE_URL}/api/classify"
