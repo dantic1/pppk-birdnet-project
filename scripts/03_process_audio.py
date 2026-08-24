@@ -2,6 +2,7 @@ import os
 import sys
 import json 
 import requests
+from datetime import datetime, timezone
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from config.config import (
@@ -108,6 +109,23 @@ for location_name in sorted(os.listdir(AUDIO_DIR)):
                   f"({det.get('common_name')}) "
                   f"conf={det.get('confidence')}"
             )
+        
+        #Save observation to MongoDB
+        obs_doc = {
+            "filename": filename,
+            "location": location_name,
+            "lat": coords["lat"],
+            "lon": coords["lon"],
+            "minio_key": object_key,
+            "processed_at": datetime.now(timezone.utc),
+            "num_detections": len(detections),
+        }
+
+        obs_result = observations.insert_one(obs_doc)
+        obs_id = obs_result.inserted_id
+        print(f"\tsaved observation: {obs_id}")
+
+
 
 
 
