@@ -56,6 +56,8 @@ observations = db.get_collection(COLLECTION_OBSERVATIONS)
 classifications = db.get_collection(COLLECTION_CLASSIFICATIONS)
 species = db.get_collection(COLLECTION_SPECIES)
 
+species.create_index("species")
+
 print()
 
 # Load locations.json
