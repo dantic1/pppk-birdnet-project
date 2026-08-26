@@ -6,6 +6,39 @@ on:
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7
+        env:
+          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USER }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+      minio:
+        image: bitnami/minio:latest
+        env:
+          MINIO_ROOT_USER: ${{ secrets.MINIO_USER }}
+          MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
+        ports:
+          - 9000:9000
+
+    env:
+      MONGO_USER: ${{ secrets.MONGO_USER }}
+      MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+      MONGO_DB: ${{ secrets.MONGO_DB }}
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      MINIO_USER: ${{ secrets.MINIO_USER }}
+      MINIO_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
+      MINIO_ENDPOINT: ${{ secrets.MINIO_ENDPOINT }}
+      MINIO_BUCKET: ${{ secrets.MINIO_BUCKET }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,3 +52,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Run pipeline
+        run: snakemake --cores 1
