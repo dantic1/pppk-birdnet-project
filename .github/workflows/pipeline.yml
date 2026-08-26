@@ -22,7 +22,7 @@ jobs:
           --health-retries 10
 
       minio:
-        image: bitnami/minio:latest
+        image: minio/minio:latest
         env:
           MINIO_ROOT_USER: ${{ secrets.MINIO_USER }}
           MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
