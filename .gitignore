@@ -210,7 +210,7 @@ __marimo__/
 
 output/
 logs/
-data/audio/
+#data/audio/
 *.csv
 .snakemake_markers/
 .snakemake/
