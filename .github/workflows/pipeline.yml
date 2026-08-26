@@ -7,28 +7,6 @@ jobs:
   run-pipeline:
     runs-on: ubuntu-latest
 
-    services:
-      mongodb:
-        image: mongo:7
-        env:
-          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_USER }}
-          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-
-      minio:
-        image: minio/minio:latest
-        env:
-          MINIO_ROOT_USER: ${{ secrets.MINIO_USER }}
-          MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
-        ports:
-          - 9000:9000
-
     env:
       MONGO_USER: ${{ secrets.MONGO_USER }}
       MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
@@ -43,6 +21,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Start services (docker compose)
+        run: docker compose up -d
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -53,5 +34,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Wait for services
+        run: sleep 20
+
       - name: Run pipeline
         run: snakemake --cores 1
+
+      - name: Stop services
+        if: always()
+        run: docker compose down
