@@ -212,4 +212,5 @@ output/
 logs/
 data/audio/
 *.csv
-
+.snakemake_markers/
+.snakemake/
