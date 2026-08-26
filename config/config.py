@@ -26,3 +26,6 @@ AVES_CLASSIFY_URL = f"{AVES_BASE_URL}/api/classify"
 AUDIO_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "audio")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "output")
 LOGS_DIR = os.path.join(os.path.dirname(__file__), "..", "logs")
+
+
+CONFIDENCE_THRESHOLD = 0.7
