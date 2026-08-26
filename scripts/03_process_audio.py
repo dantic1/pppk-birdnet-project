@@ -2,6 +2,7 @@ import os
 import sys
 import json 
 import requests
+import io
 from datetime import datetime, timezone
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
@@ -57,6 +58,7 @@ classifications = db.get_collection(COLLECTION_CLASSIFICATIONS)
 species = db.get_collection(COLLECTION_SPECIES)
 
 species.create_index("species")
+observations.create_index("minio_key", unique=True)
 
 print()
 
@@ -89,6 +91,10 @@ for location_name in sorted(os.listdir(AUDIO_DIR)):
 
         file_path = os.path.join(location_path, filename)
         object_key = f"{location_name}/{filename}"
+
+        if observations.find_one({"minio_key": object_key}):
+            print(f"\t*SKIP* {object_key} already processed")
+            continue
 
         print(f"\taudio: {filename}")
 
@@ -151,6 +157,30 @@ for location_name in sorted(os.listdir(AUDIO_DIR)):
             classifications.insert_one(classification_doc)
 
         print(f"\tsaved {len(detections)} classification(s)")
+
+        log_payload = {
+            "filename": filename,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "location": location_name,
+            "minio_key": object_key,
+            "detections": len(detections),
+            "response": api_response
+        }
+
+        log_bytes = json.dumps(log_payload, ensure_ascii=False, indent=2).encode("utf-8")
+        log_key = f"logs/{location_name}/{filename}.json"
+
+        minio_client.put_object(
+            MINIO_BUCKET,
+            log_key,
+            io.BytesIO(log_bytes),
+            length=len(log_bytes),
+            content_type="application/json"
+        )
+
+        print(f"\tsaved log to Minio: {log_key}")
+
+    
 
 
 
